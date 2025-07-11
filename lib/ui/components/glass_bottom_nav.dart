@@ -13,6 +13,7 @@ class GlassBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ClipRRect(
@@ -24,21 +25,33 @@ class GlassBottomNavBar extends StatelessWidget {
             curve: Curves.easeOutCubic,
             height: 70,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.18),
+              color: theme.colorScheme.surface.withOpacity(0.85),
               borderRadius: BorderRadius.circular(30.0),
               border: Border.all(
-                color: Colors.white.withOpacity(0.3),
+                color: theme.colorScheme.primary.withOpacity(0.18),
                 width: 1.5,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.primary.withOpacity(0.08),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(Icons.home_rounded, "Home", 0),
-                _buildNavItem(Icons.show_chart_rounded, "Signals", 1),
-                _buildNavItem(Icons.trending_up_rounded, "Gains", 2),
-                _buildNavItem(Icons.notifications_rounded, "Alerts", 3),
-                _buildNavItem(Icons.info_outline_rounded, "About", 4),
+                _buildNavItem(context, Icons.home_rounded, "Home", 0),
+                _buildNavItem(context, Icons.show_chart_rounded, "Signals", 1),
+                _buildNavItem(context, Icons.trending_up_rounded, "Gains", 2),
+                _buildNavItem(
+                  context,
+                  Icons.notifications_rounded,
+                  "Alerts",
+                  3,
+                ),
+                _buildNavItem(context, Icons.info_outline_rounded, "About", 4),
               ],
             ),
           ),
@@ -47,7 +60,13 @@ class GlassBottomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
+  Widget _buildNavItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    int index,
+  ) {
+    final theme = Theme.of(context);
     final isSelected = index == currentIndex;
     return GestureDetector(
       onTap: () => onTap(index),
@@ -57,7 +76,7 @@ class GlassBottomNavBar extends StatelessWidget {
         decoration:
             isSelected
                 ? BoxDecoration(
-                  color: Colors.white.withOpacity(0.22),
+                  color: theme.colorScheme.primary.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(18),
                 )
                 : null,
@@ -66,16 +85,13 @@ class GlassBottomNavBar extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? Colors.blueAccent : Colors.white,
+              color: isSelected ? theme.colorScheme.primary : Colors.white70,
               size: 28,
             ),
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 300),
               style: TextStyle(
-                color:
-                    isSelected
-                        ? Colors.blueAccent
-                        : Colors.white.withOpacity(0.7),
+                color: isSelected ? theme.colorScheme.primary : Colors.white70,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 12,
               ),
