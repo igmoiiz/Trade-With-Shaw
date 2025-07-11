@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import '../../utils/theme/theme.dart';
 
 class SignalsPage extends StatefulWidget {
   const SignalsPage({super.key});

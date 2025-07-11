@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:ui';
-import '../../utils/theme/theme.dart';
 
 class GainsPage extends StatelessWidget {
   const GainsPage({super.key});

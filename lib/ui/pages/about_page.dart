@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import '../../utils/theme/theme.dart';
 
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
