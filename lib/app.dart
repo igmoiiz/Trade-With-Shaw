@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'ui/components/glass_bottom_nav.dart';
 import 'ui/pages/home_page.dart';
@@ -7,14 +6,27 @@ import 'ui/pages/gains_page.dart';
 import 'ui/pages/notifications_page.dart';
 import 'ui/pages/about_page.dart';
 
-class TradeWithShawApp extends StatefulWidget {
-  const TradeWithShawApp({Key? key}) : super(key: key);
+class TradeWithShawApp extends StatelessWidget {
+  const TradeWithShawApp({super.key});
 
   @override
-  State<TradeWithShawApp> createState() => _TradeWithShawAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Trade With Shaw',
+      debugShowCheckedModeBanner: false,
+      home: const MainNavigation(),
+    );
+  }
 }
 
-class _TradeWithShawAppState extends State<TradeWithShawApp> {
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
+
+  @override
+  State<MainNavigation> createState() => _MainNavigationState();
+}
+
+class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
