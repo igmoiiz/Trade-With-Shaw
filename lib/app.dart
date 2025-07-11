@@ -5,6 +5,7 @@ import 'ui/pages/signals_page.dart';
 import 'ui/pages/gains_page.dart';
 import 'ui/pages/notifications_page.dart';
 import 'ui/pages/about_page.dart';
+import 'utils/theme/theme.dart';
 
 class TradeWithShawApp extends StatelessWidget {
   const TradeWithShawApp({super.key});
@@ -14,6 +15,7 @@ class TradeWithShawApp extends StatelessWidget {
     return MaterialApp(
       title: 'Trade With Shaw',
       debugShowCheckedModeBanner: false,
+      theme: applicationTheme,
       home: const MainNavigation(),
     );
   }
