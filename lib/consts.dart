@@ -1,0 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
+final String supabase_url = 'https://vgnxvtixnotgwgusclor.supabase.co';
+final String supabase_anon_key =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZnbnh2dGl4bm90Z3dndXNjbG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzMTAwOTksImV4cCI6MjA2Nzg4NjA5OX0.OXRdvleOBX3CTj3jfvUqvdTWsKWxC_D2k4AHpBPCaY0';
