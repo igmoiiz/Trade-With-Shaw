@@ -5,14 +5,14 @@ import 'package:trade_with_shaw/utils/components/comments_sheet.dart';
 
 import 'package:trade_with_shaw/utils/components/feed_post_card.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class InterfacePage extends StatefulWidget {
+  const InterfacePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<InterfacePage> createState() => _InterfacePageState();
 }
 
-class _HomePageState extends State<HomePage>
+class _InterfacePageState extends State<InterfacePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
