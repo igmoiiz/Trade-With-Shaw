@@ -49,6 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(padding: const EdgeInsets.all(8.0), child: LogoImage()),
+          const SizedBox(height: 20),
           Text(
             "Please Wait While We are Loading the Session..",
             style: TextStyle(
@@ -56,6 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
               fontFamily: GoogleFonts.poppins().fontFamily,
             ),
           ),
+          const SizedBox(height: 20),
           const CircularProgressIndicator(),
         ],
       ),

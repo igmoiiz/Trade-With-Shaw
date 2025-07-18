@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
 import 'dart:ui';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 class SignalsPage extends StatefulWidget {
   const SignalsPage({super.key});
@@ -94,8 +95,13 @@ class _SignalsPageState extends State<SignalsPage>
                   ),
                 if (!api.loading)
                   Expanded(
-                    child: RefreshIndicator(
+                    child: LiquidPullToRefresh(
                       onRefresh: () => api.refreshSignals(),
+                      color: Theme.of(context).colorScheme.primary,
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                      animSpeedFactor: 2.0,
+                      showChildOpacityTransition: true,
                       child: Stack(
                         children: [
                           ListView.builder(
