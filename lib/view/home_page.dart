@@ -18,6 +18,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = const [
     InterfacePage(),
     SignalsPage(),
+    Scaffold(body: Placeholder()),
     NotificationsPage(),
     AboutPage(),
   ];
