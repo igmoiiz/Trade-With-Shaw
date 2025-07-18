@@ -4,6 +4,8 @@ import 'package:trade_with_shaw/utils/components/logo_image.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:trade_with_shaw/view/authentication/login_page.dart';
 import 'package:trade_with_shaw/view/home_page.dart';
+import 'package:provider/provider.dart';
+import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -28,6 +30,8 @@ class _SplashScreenState extends State<SplashScreen> {
     ); // Optional: for splash effect
     if (!mounted) return;
     if (token != null && token.isNotEmpty) {
+      // Set token in ApiProvider for session management
+      Provider.of<ApiProvider>(context, listen: false).setToken(token);
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));

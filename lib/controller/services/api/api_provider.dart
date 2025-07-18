@@ -72,6 +72,12 @@ class ApiProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setToken(String? token) {
+    _jwtToken = token;
+    _apiService.updateToken(token);
+    notifyListeners();
+  }
+
   Future<void> fetchFeed({bool forceRefresh = false}) async {
     final now = DateTime.now();
     if (!forceRefresh &&
