@@ -14,55 +14,56 @@ class RegistrationPage extends StatelessWidget {
       extendBody: true,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            const LogoImage(),
-            Column(
-              children: [
-                Column(
-                  children: [
-                    MyTextfield(
-                      suffixIcon: null,
-                      labelText: 'Email',
-                      obscure: false,
-                      controller: TextEditingController(),
-                    ),
-                    MyTextfield(
-                      suffixIcon: null,
-                      labelText: 'Username',
-                      obscure: false,
-                      controller: TextEditingController(),
-                    ),
-                    MyTextfield(
-                      suffixIcon: Padding(
-                        padding: const EdgeInsets.only(right: 18.0),
-                        child: Icon(
-                          Icons.visibility_sharp,
-                          color: theme.colorScheme.primary,
-                        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const LogoImage(),
+              Column(
+                children: [
+                  Column(
+                    children: [
+                      MyTextfield(
+                        suffixIcon: null,
+                        labelText: 'Email',
+                        obscure: false,
+                        controller: TextEditingController(),
                       ),
-                      labelText: 'Password',
-                      obscure: false,
-                      controller: TextEditingController(),
-                    ),
-                    MyTextfield(
-                      suffixIcon: Padding(
-                        padding: const EdgeInsets.only(right: 18.0),
-                        child: Icon(
-                          Icons.visibility_sharp,
-                          color: theme.colorScheme.primary,
+
+                      MyTextfield(
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.only(right: 18.0),
+                          child: Icon(
+                            Icons.visibility_sharp,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
+                        labelText: 'Password',
+                        obscure: false,
+                        controller: TextEditingController(),
                       ),
-                      labelText: 'ConfirmPassword',
-                      obscure: false,
-                      controller: TextEditingController(),
-                    ),
-                  ],
-                ),
-                MyButton(loading: false, buttontext: 'Register', onTap: () {}),
-              ],
-            ),
-          ],
+                      MyTextfield(
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.only(right: 18.0),
+                          child: Icon(
+                            Icons.visibility_sharp,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        labelText: 'ConfirmPassword',
+                        obscure: false,
+                        controller: TextEditingController(),
+                      ),
+                    ],
+                  ),
+                  MyButton(
+                    loading: false,
+                    buttontext: 'Register',
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
