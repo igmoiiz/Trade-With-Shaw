@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:trade_with_shaw/consts.dart';
 import 'package:trade_with_shaw/utils/theme/theme.dart';
+import 'package:trade_with_shaw/view/home_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: applicationTheme,
       home: const HomePage(),
-    ),
-  );
+    );
+  }
 }
