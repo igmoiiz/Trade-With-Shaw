@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:trade_with_shaw/ui/components/button.dart';
 import 'package:trade_with_shaw/ui/components/logo_image.dart';
 import 'package:trade_with_shaw/ui/components/textfield.dart';
+import 'package:trade_with_shaw/ui/pages/auth/register_page.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -17,16 +18,6 @@ class LoginPage extends StatelessWidget {
             const LogoImage(),
             Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  child: Text(
-                    'NCBA&E: Empowering Minds, Shaping Futures',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ),
                 Column(
                   children: [
                     MyTextfield(
@@ -51,27 +42,36 @@ class LoginPage extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 16, right: 12, left: 12),
                   child: Row(
                     children: [
-                      Expanded(
-                        child: Divider(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                      ),
-                      const Padding(
+                      Expanded(child: Divider(color: Colors.white)),
+                      Padding(
                         padding: EdgeInsets.all(12.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
-                          children: [Text('Do Not Have A Account?')],
+                          children: [
+                            Text(
+                              'Do Not Have A Account?',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Expanded(
-                        child: Divider(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                      ),
+                      Expanded(child: Divider(color: Colors.white)),
                     ],
                   ),
                 ),
-                MyButton(loading: false, buttontext: 'Register', onTap: () {}),
+                MyButton(
+                  loading: false,
+                  buttontext: 'Register',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => RegistrationPage(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 20),

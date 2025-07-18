@@ -12,5 +12,6 @@ ThemeData applicationTheme = ThemeData(
     surface: const Color(0xFF0D0D0D),
     primary: const Color(0xFFF9A825),
     tertiary: Colors.white10,
+    secondary: const Color(0xFFD9B240),
   ),
 );

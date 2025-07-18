@@ -2,21 +2,12 @@
 
 import 'package:flutter/material.dart';
 
-/// A custom text field widget with a label, optional suffix icon, and validation.
 class MyTextfield extends StatelessWidget {
-  /// The label text to display above the text field.
   final String labelText;
-
-  /// Whether the text field should obscure the input (e.g., for passwords).
   final bool obscure;
-
-  /// The text editing controller for the text field.
   final TextEditingController controller;
-
-  /// An optional suffix icon to display at the end of the text field.
   var suffixIcon;
 
-  /// Creates a new instance of [MyTextfield].
   MyTextfield({
     super.key,
     required this.labelText,
