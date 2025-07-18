@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:trade_with_shaw/consts.dart';
 import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
 import 'package:trade_with_shaw/utils/theme/theme.dart';
-import 'package:trade_with_shaw/view/authentication/login_page.dart';
+import 'package:trade_with_shaw/view/splash/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
       title: 'TWS',
       debugShowCheckedModeBanner: false,
       theme: applicationTheme,
-      home: const LoginPage(),
+      home: const SplashScreen(),
     );
   }
 }
