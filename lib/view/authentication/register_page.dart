@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:trade_with_shaw/ui/components/button.dart';
-import 'package:trade_with_shaw/ui/components/logo_image.dart';
-import 'package:trade_with_shaw/ui/components/textfield.dart';
+import 'package:trade_with_shaw/utils/components/button.dart';
+import 'package:trade_with_shaw/utils/components/logo_image.dart';
+import 'package:trade_with_shaw/utils/components/textfield.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
