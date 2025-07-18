@@ -10,6 +10,7 @@ class ApiService {
       'http://192.168.18.78:3000/api'; // <-- Set your local IP here
 
   String? _token;
+  String? get token => _token;
 
   void updateToken(String? token) {
     _token = token;

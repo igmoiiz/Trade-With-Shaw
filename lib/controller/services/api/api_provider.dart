@@ -12,6 +12,7 @@ class ApiProvider extends ChangeNotifier {
   List<Signal> _signals = [];
   bool _loading = false;
   String? _error;
+  String? _jwtToken;
 
   // Caching
   DateTime? _feedCacheTime;
@@ -24,6 +25,7 @@ class ApiProvider extends ChangeNotifier {
   bool get loading => _loading;
   String? get error => _error;
   bool get isPremium => _user?.isPremium ?? false;
+  String? get jwtToken => _jwtToken;
 
   Future<void> login(String email, String password) async {
     _loading = true;
@@ -31,6 +33,7 @@ class ApiProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _user = await _apiService.login(email, password);
+      _jwtToken = _apiService.token;
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -47,6 +50,7 @@ class ApiProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _user = await _apiService.register(email, password);
+      _jwtToken = _apiService.token;
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -63,6 +67,7 @@ class ApiProvider extends ChangeNotifier {
     _signals = [];
     _feedCacheTime = null;
     _signalsCacheTime = null;
+    _jwtToken = null;
     _apiService.updateToken(null);
     notifyListeners();
   }
