@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:trade_with_shaw/controller/input_controllers.dart';
 import 'package:trade_with_shaw/utils/components/button.dart';
 import 'package:trade_with_shaw/utils/components/logo_image.dart';
 import 'package:trade_with_shaw/utils/components/textfield.dart';
@@ -14,36 +17,38 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
-  bool _loading = false;
+  //  Instances for controllers, errors and secure storage
+  final Controllers _controllers = Controllers();
   String? _error;
   final _storage = const FlutterSecureStorage();
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmController.dispose();
+    _controllers.emailController.dispose();
+    _controllers.passwordController.dispose();
+    _controllers.confirmPasswordController.dispose();
     super.dispose();
   }
 
   Future<void> _register() async {
     setState(() {
-      _loading = true;
+      _controllers.loading = true;
       _error = null;
     });
-    if (_passwordController.text != _confirmController.text) {
+    if (_controllers.passwordController.text !=
+        _controllers.confirmPasswordController.text) {
       setState(() {
         _error = 'Passwords do not match';
-        _loading = false;
+        _controllers.loading = false;
       });
       return;
     }
     try {
       final api = Provider.of<ApiProvider>(context, listen: false);
-      await api.register(_emailController.text, _passwordController.text);
+      await api.register(
+        _controllers.emailController.text.trim(),
+        _controllers.passwordController.text.trim(),
+      );
       // Store JWT token if available
       final token = api.jwtToken;
       if (token != null) {
@@ -63,7 +68,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       });
     } finally {
       setState(() {
-        _loading = false;
+        _controllers.loading = false;
       });
     }
   }
@@ -90,7 +95,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     suffixIcon: null,
                     labelText: 'Email',
                     obscure: false,
-                    controller: _emailController,
+                    controller: _controllers.emailController,
                   ),
                   MyTextfield(
                     suffixIcon: Padding(
@@ -102,7 +107,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                     labelText: 'Password',
                     obscure: true,
-                    controller: _passwordController,
+                    controller: _controllers.passwordController,
                   ),
                   MyTextfield(
                     suffixIcon: Padding(
@@ -114,12 +119,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                     labelText: 'Confirm Password',
                     obscure: true,
-                    controller: _confirmController,
+                    controller: _controllers.confirmPasswordController,
                   ),
                   MyButton(
-                    loading: _loading,
+                    loading: _controllers.loading,
                     buttontext: 'Register',
-                    onTap: _loading ? () {} : _register,
+                    onTap:
+                        _controllers.loading
+                            ? CircularProgressIndicator.adaptive
+                            : _register,
                   ),
                 ],
               ),

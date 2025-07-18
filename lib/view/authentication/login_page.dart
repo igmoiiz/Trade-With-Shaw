@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:trade_with_shaw/controller/input_controllers.dart';
 import 'package:trade_with_shaw/utils/components/button.dart';
 import 'package:trade_with_shaw/utils/components/logo_image.dart';
 import 'package:trade_with_shaw/utils/components/textfield.dart';
@@ -15,27 +18,29 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _loading = false;
+  //  Instance for input controllers, errors and secure storage
+  final Controllers _controllers = Controllers();
   String? _error;
   final _storage = const FlutterSecureStorage();
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _controllers.emailController.dispose();
+    _controllers.passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _login() async {
     setState(() {
-      _loading = true;
+      _controllers.loading = true;
       _error = null;
     });
     try {
       final api = Provider.of<ApiProvider>(context, listen: false);
-      await api.login(_emailController.text, _passwordController.text);
+      await api.login(
+        _controllers.emailController.text.trim(),
+        _controllers.passwordController.text.trim(),
+      );
       // Store JWT token if available
       final token = api.jwtToken;
       if (token != null) {
@@ -55,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
       });
     } finally {
       setState(() {
-        _loading = false;
+        _controllers.loading = false;
       });
     }
   }
@@ -80,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                   suffixIcon: null,
                   labelText: 'Email',
                   obscure: false,
-                  controller: _emailController,
+                  controller: _controllers.emailController,
                 ),
                 MyTextfield(
                   suffixIcon: Padding(
@@ -89,12 +94,15 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   labelText: 'Password',
                   obscure: true,
-                  controller: _passwordController,
+                  controller: _controllers.passwordController,
                 ),
                 MyButton(
-                  loading: _loading,
+                  loading: _controllers.loading,
                   buttontext: 'Login',
-                  onTap: _loading ? () {} : _login,
+                  onTap:
+                      _controllers.loading
+                          ? CircularProgressIndicator.adaptive
+                          : _login,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 16, right: 12, left: 12),
