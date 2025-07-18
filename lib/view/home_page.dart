@@ -18,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = const [
     InterfacePage(),
     SignalsPage(),
-    Scaffold(body: Placeholder()),
+    // Scaffold(body: Placeholder()),
     NotificationsPage(),
     AboutPage(),
   ];
@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print(_selectedIndex);
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedIndex],
