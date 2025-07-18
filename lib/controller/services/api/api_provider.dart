@@ -4,18 +4,6 @@ import 'package:trade_with_shaw/model/feed.dart';
 import 'package:trade_with_shaw/model/signal.dart';
 import 'api_service.dart';
 
-// Usage:
-// Wrap your app with ChangeNotifierProvider(
-//   create: (_) => ApiProvider(),
-//   child: MyApp(),
-// )
-//
-// Access with: Provider.of<ApiProvider>(context, listen: false)
-//
-// Add provider to pubspec.yaml: provider: ^6.0.0
-//
-// import 'package:provider/provider.dart';
-
 class ApiProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
 
@@ -24,6 +12,12 @@ class ApiProvider extends ChangeNotifier {
   List<Signal> _signals = [];
   bool _loading = false;
   String? _error;
+  String? _jwtToken;
+
+  // Caching
+  DateTime? _feedCacheTime;
+  DateTime? _signalsCacheTime;
+  static const Duration _cacheDuration = Duration(minutes: 1);
 
   User? get user => _user;
   List<Feed> get feed => _feed;
@@ -31,6 +25,7 @@ class ApiProvider extends ChangeNotifier {
   bool get loading => _loading;
   String? get error => _error;
   bool get isPremium => _user?.isPremium ?? false;
+  String? get jwtToken => _jwtToken;
 
   Future<void> login(String email, String password) async {
     _loading = true;
@@ -38,6 +33,7 @@ class ApiProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _user = await _apiService.login(email, password);
+      _jwtToken = _apiService.token;
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -54,6 +50,7 @@ class ApiProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _user = await _apiService.register(email, password);
+      _jwtToken = _apiService.token;
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -68,17 +65,38 @@ class ApiProvider extends ChangeNotifier {
     _user = null;
     _feed = [];
     _signals = [];
+    _feedCacheTime = null;
+    _signalsCacheTime = null;
+    _jwtToken = null;
     _apiService.updateToken(null);
     notifyListeners();
   }
 
-  Future<void> fetchFeed() async {
+  void setToken(String? token) {
+    _jwtToken = token;
+    _apiService.updateToken(token);
+    notifyListeners();
+  }
+
+  Future<void> fetchFeed({bool forceRefresh = false}) async {
+    final now = DateTime.now();
+    if (!forceRefresh &&
+        _feed.isNotEmpty &&
+        _feedCacheTime != null &&
+        now.difference(_feedCacheTime!) < _cacheDuration) {
+      // Use cache
+      return;
+    }
     _loading = true;
     _error = null;
     notifyListeners();
     try {
-      _feed = await _apiService.fetchFeed();
-      notifyListeners();
+      final newFeed = await _apiService.fetchFeed();
+      if (newFeed != _feed) {
+        _feed = newFeed;
+        _feedCacheTime = now;
+        notifyListeners();
+      }
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -86,6 +104,10 @@ class ApiProvider extends ChangeNotifier {
       _loading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> refreshFeed() async {
+    await fetchFeed(forceRefresh: true);
   }
 
   Future<void> likeFeed(String feedId) async {
@@ -102,13 +124,25 @@ class ApiProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchSignals() async {
+  Future<void> fetchSignals({bool forceRefresh = false}) async {
+    final now = DateTime.now();
+    if (!forceRefresh &&
+        _signals.isNotEmpty &&
+        _signalsCacheTime != null &&
+        now.difference(_signalsCacheTime!) < _cacheDuration) {
+      // Use cache
+      return;
+    }
     _loading = true;
     _error = null;
     notifyListeners();
     try {
-      _signals = await _apiService.fetchSignals();
-      notifyListeners();
+      final newSignals = await _apiService.fetchSignals();
+      if (newSignals != _signals) {
+        _signals = newSignals;
+        _signalsCacheTime = now;
+        notifyListeners();
+      }
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -116,6 +150,10 @@ class ApiProvider extends ChangeNotifier {
       _loading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> refreshSignals() async {
+    await fetchSignals(forceRefresh: true);
   }
 
   Future<void> postComment(String feedId, String text) async {

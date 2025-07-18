@@ -6,6 +6,7 @@ import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
 import 'package:trade_with_shaw/utils/components/comments_sheet.dart';
 import 'package:trade_with_shaw/utils/components/feed_post_card.dart';
 import 'package:trade_with_shaw/model/feed.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 class InterfacePage extends StatefulWidget {
   const InterfacePage({super.key});
@@ -77,64 +78,82 @@ class _InterfacePageState extends State<InterfacePage>
         child:
             api.loading
                 ? const Center(child: CircularProgressIndicator())
-                : CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16.0,
-                          horizontal: 16,
-                        ),
-                        child: Text(
-                          'Feed & News',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (api.error != null)
+                : LiquidPullToRefresh(
+                  onRefresh: () => api.refreshFeed(),
+                  color: Theme.of(context).colorScheme.primary,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  animSpeedFactor: 2.0,
+                  showChildOpacityTransition: true,
+                  child: CustomScrollView(
+                    slivers: [
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16.0,
+                            horizontal: 16,
+                          ),
                           child: Text(
-                            api.error!,
-                            style: const TextStyle(color: Colors.red),
+                            'Feed & News',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final post = api.feed[index];
-                        return FadeTransition(
-                          opacity: Tween<double>(begin: 0, end: 1).animate(
-                            CurvedAnimation(
-                              parent: _controller,
-                              curve: Interval(
-                                0.1 * index,
-                                0.6 + 0.2 * index,
-                                curve: Curves.easeOut,
-                              ),
+                      if (api.error != null)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  api.error ?? 'Unknown error',
+                                  style: const TextStyle(color: Colors.red),
+                                  maxLines: 5,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: () => api.refreshFeed(),
+                                  child: const Text('Retry'),
+                                ),
+                              ],
                             ),
                           ),
-                          child: FeedPostCard(
-                            time: post.createdAt?.toLocal().toString() ?? '',
-                            image: post.imageUrl,
-                            caption: post.caption,
-                            likes: post.likes.length,
-                            liked: post.likes.contains(api.user?.id ?? ''),
-                            commentsCount: post.comments.length,
-                            onLike: () => api.likeFeed(post.id),
-                            onComment: () => _showComments(context, post),
-                          ),
-                        );
-                      }, childCount: api.feed.length),
-                    ),
-                    SliverToBoxAdapter(child: SizedBox(height: 32)),
-                  ],
+                        ),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final post = api.feed[index];
+                          return FadeTransition(
+                            opacity: Tween<double>(begin: 0, end: 1).animate(
+                              CurvedAnimation(
+                                parent: _controller,
+                                curve: Interval(
+                                  0.1 * index,
+                                  0.6 + 0.2 * index,
+                                  curve: Curves.easeOut,
+                                ),
+                              ),
+                            ),
+                            child: FeedPostCard(
+                              time: post.createdAt?.toLocal().toString() ?? '',
+                              image: post.imageUrl,
+                              caption: post.caption,
+                              likes: post.likes.length,
+                              liked: post.likes.contains(api.user?.id ?? ''),
+                              commentsCount: post.comments.length,
+                              onLike: () => api.likeFeed(post.id),
+                              onComment: () => _showComments(context, post),
+                            ),
+                          );
+                        }, childCount: api.feed.length),
+                      ),
+                      SliverToBoxAdapter(child: SizedBox(height: 32)),
+                    ],
+                  ),
                 ),
       ),
     );

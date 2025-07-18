@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trade_with_shaw/utils/components/glass_bottom_nav.dart';
 import 'package:trade_with_shaw/view/interface/about_page.dart';
-import 'package:trade_with_shaw/view/interface/gains_page.dart';
 import 'package:trade_with_shaw/view/interface/interface_page.dart';
 import 'package:trade_with_shaw/view/interface/notifications_page.dart';
 import 'package:trade_with_shaw/view/interface/signals_page.dart';
@@ -19,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = const [
     InterfacePage(),
     SignalsPage(),
-    GainsPage(),
+    // Scaffold(body: Placeholder()),
     NotificationsPage(),
     AboutPage(),
   ];
@@ -32,6 +31,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print(_selectedIndex);
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedIndex],

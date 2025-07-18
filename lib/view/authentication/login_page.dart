@@ -1,9 +1,15 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
+import 'package:trade_with_shaw/controller/input_controllers.dart';
 import 'package:trade_with_shaw/utils/components/button.dart';
 import 'package:trade_with_shaw/utils/components/logo_image.dart';
 import 'package:trade_with_shaw/utils/components/textfield.dart';
+import 'package:trade_with_shaw/view/authentication/register_page.dart';
+import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:trade_with_shaw/view/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,30 +19,43 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _loading = false;
+  //  Instance for input controllers, errors and secure storage
+  final Controllers _controllers = Controllers();
   String? _error;
+  final _storage = const FlutterSecureStorage();
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _controllers.emailController.dispose();
+    _controllers.passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _login() async {
     setState(() {
-      _loading = true;
+      _controllers.loading = true;
       _error = null;
     });
     try {
-      await Provider.of<ApiProvider>(
-        context,
-        listen: false,
-      ).login(_emailController.text, _passwordController.text);
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
+      final api = Provider.of<ApiProvider>(context, listen: false);
+      await api.login(
+        _controllers.emailController.text.trim(),
+        _controllers.passwordController.text.trim(),
+      );
+      // Store JWT token if available
+      final token = api.jwtToken;
+      if (token != null) {
+        await _storage.write(key: 'jwt_token', value: token);
+      }
+      if (api.user != null) {
+        // Navigate to home page (replace with your home page route)
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      } else if (api.error != null) {
+        setState(() {
+          _error = api.error;
+        });
       }
     } catch (e) {
       setState(() {
@@ -44,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
       });
     } finally {
       setState(() {
-        _loading = false;
+        _controllers.loading = false;
       });
     }
   }
@@ -60,16 +79,6 @@ class _LoginPageState extends State<LoginPage> {
             const LogoImage(),
             Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  child: Text(
-                    'Welcome Back! Please login to continue.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ),
                 if (_error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
@@ -79,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                   suffixIcon: null,
                   labelText: 'Email',
                   obscure: false,
-                  controller: _emailController,
+                  controller: _controllers.emailController,
                 ),
                 MyTextfield(
                   suffixIcon: Padding(
@@ -88,34 +97,36 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   labelText: 'Password',
                   obscure: true,
-                  controller: _passwordController,
+                  controller: _controllers.passwordController,
                 ),
                 MyButton(
-                  loading: _loading,
+                  loading: _controllers.loading,
                   buttontext: 'Login',
-                  onTap: _loading ? () {} : () => _login(),
+                  onTap:
+                      _controllers.loading
+                          ? CircularProgressIndicator.adaptive
+                          : _login,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 16, right: 12, left: 12),
                   child: Row(
                     children: [
-                      Expanded(
-                        child: Divider(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                      ),
-                      const Padding(
+                      Expanded(child: Divider(color: Colors.white)),
+                      Padding(
                         padding: EdgeInsets.all(12.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
-                          children: [Text('Do Not Have An Account?')],
+                          children: [
+                            Text(
+                              'Do Not Have An Account?',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Expanded(
-                        child: Divider(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                      ),
+                      Expanded(child: Divider(color: Colors.white)),
                     ],
                   ),
                 ),
@@ -123,7 +134,11 @@ class _LoginPageState extends State<LoginPage> {
                   loading: false,
                   buttontext: 'Register',
                   onTap: () {
-                    Navigator.of(context).pushReplacementNamed('/register');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const RegistrationPage(),
+                      ),
+                    );
                   },
                 ),
               ],

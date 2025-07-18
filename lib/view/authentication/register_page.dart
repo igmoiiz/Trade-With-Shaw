@@ -1,51 +1,69 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
+import 'package:trade_with_shaw/controller/input_controllers.dart';
 import 'package:trade_with_shaw/utils/components/button.dart';
 import 'package:trade_with_shaw/utils/components/logo_image.dart';
 import 'package:trade_with_shaw/utils/components/textfield.dart';
+import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:trade_with_shaw/view/authentication/login_page.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<RegistrationPage> createState() => _RegistrationPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
-  bool _loading = false;
+class _RegistrationPageState extends State<RegistrationPage> {
+  //  Instances for controllers, errors and secure storage
+  final Controllers _controllers = Controllers();
   String? _error;
+  final _storage = const FlutterSecureStorage();
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmController.dispose();
+    _controllers.emailController.dispose();
+    _controllers.passwordController.dispose();
+    _controllers.confirmPasswordController.dispose();
     super.dispose();
   }
 
   Future<void> _register() async {
     setState(() {
-      _loading = true;
+      _controllers.loading = true;
       _error = null;
     });
-    if (_passwordController.text != _confirmController.text) {
+    if (_controllers.passwordController.text !=
+        _controllers.confirmPasswordController.text) {
       setState(() {
         _error = 'Passwords do not match';
-        _loading = false;
+        _controllers.loading = false;
       });
       return;
     }
     try {
-      await Provider.of<ApiProvider>(
-        context,
-        listen: false,
-      ).register(_emailController.text, _passwordController.text);
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+      final api = Provider.of<ApiProvider>(context, listen: false);
+      await api.register(
+        _controllers.emailController.text.trim(),
+        _controllers.passwordController.text.trim(),
+      );
+      // Store JWT token if available
+      final token = api.jwtToken;
+      if (token != null) {
+        await _storage.write(key: 'jwt_token', value: token);
+      }
+      if (api.user != null) {
+        // Navigate to login page (replace with your login page route)
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else if (api.error != null) {
+        setState(() {
+          _error = api.error;
+        });
       }
     } catch (e) {
       setState(() {
@@ -53,33 +71,24 @@ class _RegisterPageState extends State<RegisterPage> {
       });
     } finally {
       setState(() {
-        _loading = false;
+        _controllers.loading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       extendBody: true,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: SafeArea(
-          child: ListView(
+        child: SingleChildScrollView(
+          child: Column(
             children: [
               const LogoImage(),
               Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    child: Text(
-                      'Create your account',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ),
                   if (_error != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
@@ -89,69 +98,42 @@ class _RegisterPageState extends State<RegisterPage> {
                     suffixIcon: null,
                     labelText: 'Email',
                     obscure: false,
-                    controller: _emailController,
+                    controller: _controllers.emailController,
                   ),
                   MyTextfield(
                     suffixIcon: Padding(
                       padding: const EdgeInsets.only(right: 18.0),
-                      child: Icon(Icons.visibility_sharp),
+                      child: Icon(
+                        Icons.visibility_sharp,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                     labelText: 'Password',
                     obscure: true,
-                    controller: _passwordController,
+                    controller: _controllers.passwordController,
                   ),
                   MyTextfield(
                     suffixIcon: Padding(
                       padding: const EdgeInsets.only(right: 18.0),
-                      child: Icon(Icons.visibility_sharp),
+                      child: Icon(
+                        Icons.visibility_sharp,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                     labelText: 'Confirm Password',
                     obscure: true,
-                    controller: _confirmController,
+                    controller: _controllers.confirmPasswordController,
                   ),
                   MyButton(
-                    loading: _loading,
+                    loading: _controllers.loading,
                     buttontext: 'Register',
-                    onTap: _loading ? () {} : () => _register(),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 16,
-                      right: 12,
-                      left: 12,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [Text('Already have an account?')],
-                          ),
-                        ),
-                        Expanded(
-                          child: Divider(
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  MyButton(
-                    loading: false,
-                    buttontext: 'Login',
-                    onTap: () {
-                      Navigator.of(context).pushReplacementNamed('/login');
-                    },
+                    onTap:
+                        _controllers.loading
+                            ? CircularProgressIndicator.adaptive
+                            : _register,
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),

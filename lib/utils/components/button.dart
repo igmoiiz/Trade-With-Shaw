@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class MyButton extends StatelessWidget {
@@ -15,7 +17,6 @@ class MyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final surfaceColor = theme.colorScheme.surface;
 
     return Padding(
       padding: const EdgeInsets.only(top: 16, right: 12, left: 12),

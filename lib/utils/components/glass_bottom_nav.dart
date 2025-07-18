@@ -46,7 +46,6 @@ class GlassBottomNavBar extends StatelessWidget {
               children: [
                 _buildNavItem(context, Icons.home_rounded, "Home", 0),
                 _buildNavItem(context, Icons.show_chart_rounded, "Signals", 1),
-                _buildNavItem(context, Icons.trending_up_rounded, "Gains", 2),
                 _buildNavItem(
                   context,
                   Icons.notifications_rounded,
