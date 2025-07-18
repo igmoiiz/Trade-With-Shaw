@@ -100,9 +100,20 @@ class _InterfacePageState extends State<InterfacePage>
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            api.error!,
-                            style: const TextStyle(color: Colors.red),
+                          child: Column(
+                            children: [
+                              Text(
+                                api.error ?? 'Unknown error',
+                                style: const TextStyle(color: Colors.red),
+                                maxLines: 5,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: () => api.refreshFeed(),
+                                child: const Text('Retry'),
+                              ),
+                            ],
                           ),
                         ),
                       ),
