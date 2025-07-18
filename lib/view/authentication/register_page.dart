@@ -8,6 +8,7 @@ import 'package:trade_with_shaw/utils/components/logo_image.dart';
 import 'package:trade_with_shaw/utils/components/textfield.dart';
 import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:trade_with_shaw/view/authentication/login_page.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -56,7 +57,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
       }
       if (api.user != null) {
         // Navigate to login page (replace with your login page route)
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
       } else if (api.error != null) {
         setState(() {
           _error = api.error;

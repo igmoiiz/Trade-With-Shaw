@@ -9,6 +9,7 @@ import 'package:trade_with_shaw/utils/components/textfield.dart';
 import 'package:trade_with_shaw/view/authentication/register_page.dart';
 import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:trade_with_shaw/view/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -48,7 +49,9 @@ class _LoginPageState extends State<LoginPage> {
       }
       if (api.user != null) {
         // Navigate to home page (replace with your home page route)
-        Navigator.of(context).pushReplacementNamed('/home');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
       } else if (api.error != null) {
         setState(() {
           _error = api.error;
