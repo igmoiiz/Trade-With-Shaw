@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MyButton extends StatelessWidget {
-  /// The text to display on the button.
   final String buttontext;
-
-  /// The callback to execute when the button is tapped.
   final VoidCallback onTap;
-
-  /// Whether to display the loading indicator.
   final bool loading;
 
   const MyButton({
@@ -19,32 +14,50 @@ class MyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final surfaceColor = theme.colorScheme.surface;
+
     return Padding(
       padding: const EdgeInsets.only(top: 16, right: 12, left: 12),
       child: GestureDetector(
-        onTap: onTap,
-        child: Container(
+        onTap: loading ? null : onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
           constraints: const BoxConstraints(minWidth: 60),
           height: 60,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            color: Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.secondary,
+            border: Border.all(color: Colors.white, width: 0.1),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.098), // 🌟 Lighter shadow
+                blurRadius: 12,
+                spreadRadius: 1,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child:
               loading
-                  ? Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * .41,
-                      vertical: MediaQuery.of(context).size.height * .015,
-                    ),
-                    child: CircularProgressIndicator(
-                      color: Theme.of(context).colorScheme.secondary,
+                  ? Center(
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.4,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                   )
                   : Center(
                     child: Text(
                       buttontext,
-                      style: const TextStyle(fontSize: 16, color: Colors.white),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
         ),
