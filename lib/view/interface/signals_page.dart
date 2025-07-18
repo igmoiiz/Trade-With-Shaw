@@ -1,6 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
 import 'dart:ui';
 
 class SignalsPage extends StatefulWidget {
@@ -13,39 +15,24 @@ class SignalsPage extends StatefulWidget {
 class _SignalsPageState extends State<SignalsPage>
     with SingleTickerProviderStateMixin {
   int _selectedChannel = 0; // 0: Free, 1: Premium
-  bool isPremiumUser = false; // Change to true to preview premium
 
-  final List<Map<String, String>> freeSignals = [
-    {
-      'author': 'Admin',
-      'message': 'Buy EUR/USD at 1.0850, TP: 1.0900, SL: 1.0820',
-      'time': '09:15',
-    },
-    {
-      'author': 'Admin',
-      'message': 'Sell GBP/USD at 1.2700, TP: 1.2650, SL: 1.2730',
-      'time': 'Yesterday',
-    },
-  ];
-
-  final List<Map<String, String>> premiumSignals = [
-    {
-      'author': 'Admin',
-      'message': 'Premium: Buy XAU/USD at 2320, TP: 2335, SL: 2312',
-      'time': '08:00',
-    },
-    {
-      'author': 'Admin',
-      'message': 'Premium: Sell USD/JPY at 157.80, TP: 157.20, SL: 158.10',
-      'time': 'Today',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ApiProvider>(context, listen: false).fetchSignals();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final api = Provider.of<ApiProvider>(context);
     final channelNames = ['Free Signals', 'Premium Signals'];
+    final freeSignals = api.signals.where((s) => s.type == 'free').toList();
+    final premiumSignals =
+        api.signals.where((s) => s.type == 'premium').toList();
     final signals = _selectedChannel == 0 ? freeSignals : premiumSignals;
-    final isLocked = _selectedChannel == 1 && !isPremiumUser;
+    final isLocked = _selectedChannel == 1 && !api.isPremium;
 
     return Container(
       decoration: BoxDecoration(
@@ -74,7 +61,7 @@ class _SignalsPageState extends State<SignalsPage>
                 ),
               ),
             ),
-            if (_selectedChannel == 0 && !isPremiumUser)
+            if (_selectedChannel == 0 && !api.isPremium)
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -82,77 +69,94 @@ class _SignalsPageState extends State<SignalsPage>
                 ),
                 child: _UpgradeBanner(),
               ),
-            Expanded(
-              child: Stack(
-                children: [
-                  ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
+            if (api.loading)
+              const Expanded(child: Center(child: CircularProgressIndicator())),
+            if (api.error != null)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  api.error!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            if (!api.loading)
+              Expanded(
+                child: Stack(
+                  children: [
+                    ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      itemCount: signals.length,
+                      itemBuilder: (context, index) {
+                        final signal = signals[index];
+                        return _SignalBubble(
+                          title: signal.title,
+                          message: signal.description,
+                          time: signal.createdAt?.toLocal().toString() ?? '',
+                          isPremium: signal.type == 'premium',
+                        );
+                      },
                     ),
-                    itemCount: signals.length,
-                    itemBuilder: (context, index) {
-                      final msg = signals[index];
-                      return _SignalBubble(
-                        author: msg['author']!,
-                        message: msg['message']!,
-                        time: msg['time']!,
-                        isPremium: _selectedChannel == 1,
-                      );
-                    },
-                  ),
-                  if (isLocked)
-                    Positioned.fill(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                          child: Container(
-                            color: Colors.black.withOpacity(0.55),
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.lock_rounded,
-                                    size: 54,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'Upgrade to access Premium Signals',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleMedium?.copyWith(
+                    if (isLocked)
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                            child: Container(
+                              color: Colors.black.withOpacity(0.55),
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.lock_rounded,
+                                      size: 54,
                                       color:
                                           Theme.of(context).colorScheme.primary,
-                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          Theme.of(context).colorScheme.primary,
-                                      foregroundColor: Colors.black,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Upgrade to access Premium Signals',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium?.copyWith(
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    onPressed: () {},
-                                    child: const Text('Upgrade Now'),
-                                  ),
-                                ],
+                                    const SizedBox(height: 16),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                        foregroundColor: Colors.black,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: () => api.upgradeToPremium(),
+                                      child: const Text('Upgrade Now'),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -197,13 +201,13 @@ class _SignalsPageState extends State<SignalsPage>
 }
 
 class _SignalBubble extends StatelessWidget {
-  final String author;
+  final String title;
   final String message;
   final String time;
   final bool isPremium;
 
   const _SignalBubble({
-    required this.author,
+    required this.title,
     required this.message,
     required this.time,
     required this.isPremium,
@@ -244,17 +248,28 @@ class _SignalBubble extends StatelessWidget {
                   child: const Icon(Icons.person, color: Colors.black),
                 ),
                 title: Text(
-                  message,
+                  title,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Colors.white,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                subtitle: Text(
-                  time,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelMedium?.copyWith(color: Colors.white54),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      message,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                    ),
+                    Text(
+                      time,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.labelMedium?.copyWith(color: Colors.white54),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -268,6 +283,7 @@ class _SignalBubble extends StatelessWidget {
 class _UpgradeBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final api = Provider.of<ApiProvider>(context);
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: BackdropFilter(
@@ -303,7 +319,7 @@ class _UpgradeBanner extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () => api.upgradeToPremium(),
                 child: const Text('Upgrade'),
               ),
             ],

@@ -5,8 +5,9 @@ import 'package:trade_with_shaw/model/feed.dart';
 import 'package:trade_with_shaw/model/signal.dart';
 
 class ApiService {
+  // IMPORTANT: Replace with your machine's local IP address so your device/emulator can reach the backend
   static const String baseUrl =
-      'http://localhost:3000/api'; // Change to your backend URL
+      'http://192.168.18.78:3000/api'; // <-- Set your local IP here
 
   String? _token;
 
@@ -70,6 +71,20 @@ class ApiService {
       return Feed.fromJson(jsonDecode(res.body));
     } else {
       throw Exception('Failed to like feed');
+    }
+  }
+
+  // Post a comment to a feed post
+  Future<Feed> postComment(String feedId, String text) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/feed/$feedId/comment'),
+      headers: _headers,
+      body: jsonEncode({'text': text}),
+    );
+    if (res.statusCode == 200) {
+      return Feed.fromJson(jsonDecode(res.body));
+    } else {
+      throw Exception('Failed to post comment');
     }
   }
 

@@ -5,6 +5,7 @@ class Feed {
   final List<String> likes;
   final List<Comment> comments;
   final String createdBy;
+  final DateTime? createdAt;
 
   Feed({
     required this.id,
@@ -13,6 +14,7 @@ class Feed {
     required this.likes,
     required this.comments,
     required this.createdBy,
+    this.createdAt,
   });
 
   factory Feed.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,10 @@ class Feed {
           json['createdBy'] is Map
               ? (json['createdBy']['email'] ?? '')
               : (json['createdBy'] ?? ''),
+      createdAt:
+          json['createdAt'] != null
+              ? DateTime.tryParse(json['createdAt'])
+              : null,
     );
   }
 
@@ -39,6 +45,7 @@ class Feed {
     'likes': likes,
     'comments': comments.map((c) => c.toJson()).toList(),
     'createdBy': createdBy,
+    'createdAt': createdAt?.toIso8601String(),
   };
 }
 

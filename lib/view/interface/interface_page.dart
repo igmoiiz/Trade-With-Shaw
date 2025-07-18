@@ -1,9 +1,11 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:trade_with_shaw/controller/services/api/api_provider.dart';
 import 'package:trade_with_shaw/utils/components/comments_sheet.dart';
-
 import 'package:trade_with_shaw/utils/components/feed_post_card.dart';
+import 'package:trade_with_shaw/model/feed.dart';
 
 class InterfacePage extends StatefulWidget {
   const InterfacePage({super.key});
@@ -16,41 +18,6 @@ class _InterfacePageState extends State<InterfacePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
-  final List<Map<String, dynamic>> feed = [
-    {
-      'time': '2 min ago',
-      'image':
-          'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
-      'caption':
-          '🚀 EUR/USD breakout! Watch for the retest at 1.0850. This is a great opportunity for a quick scalp. Remember to manage your risk and stick to your plan. #forex #trading #signals',
-      'likes': 12,
-      'comments': [
-        {'user': 'Alice', 'text': 'Great call!'},
-        {'user': 'Bob', 'text': 'Thanks for the update!'},
-      ],
-    },
-    {
-      'time': '10 min ago',
-      'image':
-          'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80',
-      'caption':
-          'GBP/USD is showing strong bullish momentum after the London open. Expecting a move towards 1.2750. Patience is key! 📈\n\nHere is a longer caption to test how the UI handles large text. The market is volatile, so always use a stop loss and never risk more than you can afford to lose. Stay disciplined and keep learning every day. #traderlife',
-      'likes': 8,
-      'comments': [
-        {'user': 'Charlie', 'text': 'Very helpful!'},
-      ],
-    },
-    {
-      'time': '1 hour ago',
-      'image':
-          'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80',
-      'caption':
-          'New premium signal: Buy XAU/USD at 2320, TP: 2335, SL: 2312. Only for premium members! 🔒',
-      'likes': 20,
-      'comments': [],
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -58,6 +25,10 @@ class _InterfacePageState extends State<InterfacePage>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final api = Provider.of<ApiProvider>(context, listen: false);
+      api.fetchFeed();
+    });
     _controller.forward();
   }
 
@@ -67,29 +38,22 @@ class _InterfacePageState extends State<InterfacePage>
     super.dispose();
   }
 
-  void _toggleLike(int index) {
-    setState(() {
-      feed[index]['liked'] = !(feed[index]['liked'] ?? false);
-      if (feed[index]['liked']) {
-        feed[index]['likes']++;
-      } else {
-        feed[index]['likes']--;
-      }
-    });
-  }
-
-  void _showComments(BuildContext context, int index) async {
+  void _showComments(BuildContext context, Feed post) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder:
           (_) => CommentsSheet(
-            comments: List<Map<String, String>>.from(feed[index]['comments']),
-            onAdd: (String text) {
-              setState(() {
-                feed[index]['comments'].add({'user': 'You', 'text': text});
-              });
+            comments:
+                post.comments
+                    .map((c) => {'user': c.user, 'text': c.text})
+                    .toList(),
+            onAdd: (String text) async {
+              await Provider.of<ApiProvider>(
+                context,
+                listen: false,
+              ).postComment(post.id, text);
             },
           ),
     );
@@ -97,6 +61,7 @@ class _InterfacePageState extends State<InterfacePage>
 
   @override
   Widget build(BuildContext context) {
+    final api = Provider.of<ApiProvider>(context);
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -109,53 +74,68 @@ class _InterfacePageState extends State<InterfacePage>
         ),
       ),
       child: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16.0,
-                  horizontal: 16,
-                ),
-                child: Text(
-                  'Feed & News',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final post = feed[index];
-                return FadeTransition(
-                  opacity: Tween<double>(begin: 0, end: 1).animate(
-                    CurvedAnimation(
-                      parent: _controller,
-                      curve: Interval(
-                        0.1 * index,
-                        0.6 + 0.2 * index,
-                        curve: Curves.easeOut,
+        child:
+            api.loading
+                ? const Center(child: CircularProgressIndicator())
+                : CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16.0,
+                          horizontal: 16,
+                        ),
+                        child: Text(
+                          'Feed & News',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  child: FeedPostCard(
-                    time: post['time'],
-                    image: post['image'],
-                    caption: post['caption'],
-                    likes: post['likes'],
-                    liked: post['liked'] ?? false,
-                    commentsCount: post['comments'].length,
-                    onLike: () => _toggleLike(index),
-                    onComment: () => _showComments(context, index),
-                  ),
-                );
-              }, childCount: feed.length),
-            ),
-            SliverToBoxAdapter(child: SizedBox(height: 32)),
-          ],
-        ),
+                    if (api.error != null)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            api.error!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ),
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final post = api.feed[index];
+                        return FadeTransition(
+                          opacity: Tween<double>(begin: 0, end: 1).animate(
+                            CurvedAnimation(
+                              parent: _controller,
+                              curve: Interval(
+                                0.1 * index,
+                                0.6 + 0.2 * index,
+                                curve: Curves.easeOut,
+                              ),
+                            ),
+                          ),
+                          child: FeedPostCard(
+                            time: post.createdAt?.toLocal().toString() ?? '',
+                            image: post.imageUrl,
+                            caption: post.caption,
+                            likes: post.likes.length,
+                            liked: post.likes.contains(api.user?.id ?? ''),
+                            commentsCount: post.comments.length,
+                            onLike: () => api.likeFeed(post.id),
+                            onComment: () => _showComments(context, post),
+                          ),
+                        );
+                      }, childCount: api.feed.length),
+                    ),
+                    SliverToBoxAdapter(child: SizedBox(height: 32)),
+                  ],
+                ),
       ),
     );
   }

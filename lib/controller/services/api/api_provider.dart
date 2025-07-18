@@ -118,6 +118,20 @@ class ApiProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> postComment(String feedId, String text) async {
+    try {
+      final updated = await _apiService.postComment(feedId, text);
+      final idx = _feed.indexWhere((f) => f.id == feedId);
+      if (idx != -1) {
+        _feed[idx] = updated;
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
   // Simulate payment and upgrade to premium
   Future<void> upgradeToPremium() async {
     if (_user != null) {
