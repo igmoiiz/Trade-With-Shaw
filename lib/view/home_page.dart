@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:trade_with_shaw/utils/components/glass_bottom_nav.dart';
 import 'package:trade_with_shaw/view/interface/about_page.dart';
@@ -15,10 +17,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = const [
+  final List<Widget> _twsPages = const [
     InterfacePage(),
     SignalsPage(),
-    // Scaffold(body: Placeholder()),
     NotificationsPage(),
     AboutPage(),
   ];
@@ -31,10 +32,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print(_selectedIndex);
+    log("$_selectedIndex");
     return Scaffold(
       extendBody: true,
-      body: _pages[_selectedIndex],
+      body: _twsPages[_selectedIndex],
       bottomNavigationBar: GlassBottomNavBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
