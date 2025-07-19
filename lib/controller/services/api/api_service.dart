@@ -7,7 +7,7 @@ import 'package:trade_with_shaw/model/signal.dart';
 class ApiService {
   // IMPORTANT: Replace with your machine's local IP address so your device/emulator can reach the backend
   static const String baseUrl =
-      'http://192.168.18.78:3000/api'; // <-- Set your local IP here
+      'http://192.168.18.116:3000/api'; // <-- Set your local IP here
 
   String? _token;
   String? get token => _token;
